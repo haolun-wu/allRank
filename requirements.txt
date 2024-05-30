@@ -9,3 +9,4 @@ flake8-print==2.0.2
 flake8-tuple==0.2.13
 mypy==0.790
 torch
+torchvision
