@@ -45,7 +45,8 @@ def rankNet(y_pred, y_true, padded_value_indicator=PADDED_Y_VALUE, weight_by_dif
     y_true[mask] = float('-inf')
 
     # here we generate every pair of indices from the range of document length in the batch
-    document_pairs_candidates = list(product(range(y_true.shape[1]), repeat=2))
+    # A list of all possible n^2 pairs [(0, 0), (0, 1), ..., (n-1, n-1)]
+    document_pairs_candidates = list(product(range(y_true.shape[1]), repeat=2)) 
 
     pairs_true = y_true[:, document_pairs_candidates]
     selected_pred = y_pred[:, document_pairs_candidates]

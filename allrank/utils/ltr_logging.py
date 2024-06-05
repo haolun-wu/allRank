@@ -7,7 +7,9 @@ def init_logger(output_dir: str) -> logging.Logger:
     log_format = "[%(levelname)s] %(asctime)s - %(message)s"
     log_dateformat = "%Y-%m-%d %H:%M:%S"
 
-    logging.basicConfig(format=log_format, datefmt=log_dateformat, stream=sys.stdout, level=logging.INFO)
+    logging.basicConfig(
+        format=log_format, datefmt=log_dateformat, stream=sys.stdout, level=logging.INFO
+    )
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -17,7 +19,9 @@ def init_logger(output_dir: str) -> logging.Logger:
     handler.setLevel(logging.INFO)
 
     # create a logging format
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     return logger

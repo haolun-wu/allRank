@@ -9,11 +9,11 @@
       "dropout": 0.0
     },
     "transformer": {
-      "N": 1,
+      "N": 2,
       "d_ff": 64,
-      "h": 1,
+      "h": 2,
       "positional_encoding": null,
-      "dropout": 0.0
+      "dropout": 0.1
     },
     "post_model": {
       "output_activation": "Sigmoid",
@@ -21,7 +21,7 @@
     }
   },
   "data": {
-    "path": "/home/mila/h/haolun.wu/projects/allRank/allrank/datasets/MSLR-WEB10K/Fold1",
+    "path": "/home/mila/h/haolun.wu/projects/allRank/allrank/datasets/MSLR-toy/Fold1",
     "validation_ds_role": "vali",
     "num_workers": 1,
     "batch_size": 64,
@@ -30,32 +30,30 @@
   "optimizer": {
     "name": "Adam",
     "args": {
-      "lr": 0.004
+      "lr": 0.001
     }
   },
   "lr_scheduler": {
     "name": "StepLR",
     "args": {
-      "step_size": 3,
-      "gamma": 0.5
+      "step_size": 50,
+      "gamma": 0.1
     }
   },
   "training": {
-    "epochs": 50,
-    "early_stopping_patience": 100,
+    "epochs": 500,
+    "early_stopping_patience": 50,
     "gradient_clipping_norm": null
   },
   "val_metric": "ndcg_50",
   "metrics": [
+    "mrr_20",
+    "mrr_50",
+    "ndcg_20",
     "ndcg_50"
   ],
   "loss": {
     "name": "rankNet",
     "args": {}
-  },
-  "expected_metrics" : {
-    "val": {
-      "ndcg_50": 0.785
-    }
   }
 }

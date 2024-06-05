@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
-datasets/
+allrank/datasets/MSLR-WEB10K
+job_dir/
 venv/
 __pycache__/
 *.py[cod]

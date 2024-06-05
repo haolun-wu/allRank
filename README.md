@@ -1,5 +1,18 @@
 # allRank : Learning to Rank in PyTorch
 
+## Haolun add. To run the baseline:
+* For pointwise, we use RMSE loss. See [allrank/models/losses/pointwise.py](allrank/models/losses/pointwise.py)
+```
+python main.py --job_dir haolun_pointwise --config_file_name scripts/config_haolun_pointwise.json
+```
+
+* For pairwise, we use RankNet loss. See [allrank/models/losses/rankNet.py](allrank/models/losses/rankNet.py)
+```
+python main.py --job_dir haolun_pairtwise --config_file_name scripts/config_haolun_pairtwise.json
+```
+
+* For the full datasets, download from [https://www.microsoft.com/en-us/research/project/mslr/](https://www.microsoft.com/en-us/research/project/mslr/). Put them in the path: datasets/MSLR-WEB10K/Folder1, ...
+
 ## About
 
 allRank is a PyTorch-based framework for training neural Learning-to-Rank (LTR) models, featuring implementations of:

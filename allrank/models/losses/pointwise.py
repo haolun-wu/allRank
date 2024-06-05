@@ -3,7 +3,7 @@ import torch
 from allrank.data.dataset_loading import PADDED_Y_VALUE
 
 
-def pointwise_rmse(y_pred, y_true, no_of_levels, padded_value_indicator=PADDED_Y_VALUE):
+def pointwise_rmse(y_pred, y_true, no_of_levels=1, padded_value_indicator=PADDED_Y_VALUE):
     """
     Pointwise RMSE loss.
     :param y_pred: predictions from the model, shape [batch_size, slate_length]
