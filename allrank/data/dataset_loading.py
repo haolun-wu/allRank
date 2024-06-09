@@ -20,13 +20,18 @@ class ToTensor(object):
     """
     Wrapper for ndarray->Tensor conversion.
     """
+
     def __call__(self, sample):
         """
         :param sample: tuple of three ndarrays
         :return: ndarrays converted to tensors
         """
         x, y, indices = sample
-        return torch.from_numpy(x).type(torch.float32), torch.from_numpy(y).type(torch.float32), torch.from_numpy(indices).type(torch.long)
+        return (
+            torch.from_numpy(x).type(torch.float32),
+            torch.from_numpy(y).type(torch.float32),
+            torch.from_numpy(indices).type(torch.long),
+        )
 
 
 class FixLength(object):
@@ -36,6 +41,7 @@ class FixLength(object):
     For a given slate, if its length is less than self.dim_given, x's and y's are padded with zeros to match that length.
     If its length is greater than self.dim_given, a random sample of items from that slate is taken to match the self.dim_given.
     """
+
     def __init__(self, dim_given):
         """
         :param dim_given: dimensionality of x after length fixing operation
@@ -51,7 +57,9 @@ class FixLength(object):
             [self.dim_given, features_dim], [self.dim_given] and [self.dim_given], respectively
         """
         sample_size = len(sample[1])
-        if sample_size < self.dim_given:  # when expected dimension is larger than number of observation in instance do the padding
+        if (
+            sample_size < self.dim_given
+        ):  # when expected dimension is larger than number of observation in instance do the padding
             fixed_len_x, fixed_len_y, indices = self._pad(sample, sample_size)
         else:  # otherwise do the sampling
             fixed_len_x, fixed_len_y, indices = self._sample(sample, sample_size)
@@ -71,7 +79,12 @@ class FixLength(object):
         fixed_len_y = sample[1][indices]
         if fixed_len_y.sum() == 0:
             if sample[1].sum() == 1:
-                indices = np.concatenate([np.random.choice(indices, self.dim_given - 1, replace=False), [np.argmax(sample[1])]])
+                indices = np.concatenate(
+                    [
+                        np.random.choice(indices, self.dim_given - 1, replace=False),
+                        [np.argmax(sample[1])],
+                    ]
+                )
                 fixed_len_y = sample[1][indices]
             elif sample[1].sum() > 0:
                 return self._sample(sample, sample_size)
@@ -87,9 +100,21 @@ class FixLength(object):
         :return: ndarrays tuple containing features, labels and original ranks of shapes
             [sample_size, features_dim], [sample_size] and [sample_size]
         """
-        fixed_len_x = np.pad(sample[0], ((0, self.dim_given - sample_size), (0, 0)), "constant")
-        fixed_len_y = np.pad(sample[1], (0, self.dim_given - sample_size), "constant", constant_values=PADDED_Y_VALUE)
-        indices = np.pad(np.arange(0, sample_size), (0, self.dim_given - sample_size), "constant", constant_values=PADDED_INDEX_VALUE)
+        fixed_len_x = np.pad(
+            sample[0], ((0, self.dim_given - sample_size), (0, 0)), "constant"
+        )
+        fixed_len_y = np.pad(
+            sample[1],
+            (0, self.dim_given - sample_size),
+            "constant",
+            constant_values=PADDED_Y_VALUE,
+        )
+        indices = np.pad(
+            np.arange(0, sample_size),
+            (0, self.dim_given - sample_size),
+            "constant",
+            constant_values=PADDED_INDEX_VALUE,
+        )
         return fixed_len_x, fixed_len_y, indices
 
 
@@ -97,16 +122,14 @@ class LibSVMDataset(Dataset):
     """
     LibSVM Learning to Rank dataset.
     """
+
     def __init__(self, X, y, query_ids, transform=None):
         """
         :param X: scipy sparse matrix containing features of the dataset of shape [dataset_size, features_dim]
         :param y: ndarray containing target labels of shape [dataset_size]
-        :param query_ids: ndarray containing group (slate) membership of dataset items of shape [dataset_size, features_dim]
+        :param query_ids: ndarray containing group (slate) membership of dataset items of shape [dataset_size]
         :param transform: a callable defining an optional transformation called on the dataset
         """
-        print("X:", X.shape)
-        print("y:", y.shape)
-        print("query_ids:", query_ids.shape)
         X = X.toarray()
 
         _, indices, counts = np.unique(query_ids, return_index=True, return_counts=True)
@@ -131,8 +154,11 @@ class LibSVMDataset(Dataset):
         :return: LibSVMDataset instantiated from a given file and with an optional transformation defined
         """
         x, y, query_ids = load_svmlight_file(svm_file_path, query_id=True)
-        logger.info("loaded dataset from {} and got x shape {}, y shape {} and query_ids shape {}".format(
-            svm_file_path, x.shape, y.shape, query_ids.shape))
+        logger.info(
+            "loaded dataset from {} and got x shape {}, y shape {} and query_ids shape {}".format(
+                svm_file_path, x.shape, y.shape, query_ids.shape
+            )
+        )
         return cls(x, y, query_ids, transform)
 
     def __len__(self):
@@ -152,7 +178,9 @@ class LibSVMDataset(Dataset):
         sample = X, y
 
         if self.transform:
-            sample = self.transform(sample)
+            sample = self.transform(
+                sample
+            )  # This is where padding to slate_length being used
 
         return sample
 
@@ -197,8 +225,9 @@ def fix_length_to_longest_slate(ds: LibSVMDataset) -> Compose:
     return transforms.Compose([FixLength(int(ds.longest_query_length)), ToTensor()])
 
 
-def load_libsvm_dataset(input_path: str, slate_length: int, validation_ds_role: str) \
-        -> Tuple[LibSVMDataset, LibSVMDataset]:
+def load_libsvm_dataset(
+    input_path: str, slate_length: int, validation_ds_role: str
+) -> Tuple[LibSVMDataset, LibSVMDataset]:
     """
     Helper function loading a train LibSVMDataset and a specified validation LibSVMDataset.
     :param input_path: directory containing the LibSVM files
@@ -214,7 +243,9 @@ def load_libsvm_dataset(input_path: str, slate_length: int, validation_ds_role: 
     return train_ds, val_ds
 
 
-def load_libsvm_dataset_role(role: str, input_path: str, slate_length: int) -> LibSVMDataset:
+def load_libsvm_dataset_role(
+    role: str, input_path: str, slate_length: int
+) -> LibSVMDataset:
     """
     Helper function loading a single role LibSVMDataset
     :param role: the role of the dataset - specifies file name and padding behaviour
@@ -230,7 +261,9 @@ def load_libsvm_dataset_role(role: str, input_path: str, slate_length: int) -> L
     return ds
 
 
-def create_data_loaders(train_ds: LibSVMDataset, val_ds: LibSVMDataset, num_workers: int, batch_size: int):
+def create_data_loaders(
+    train_ds: LibSVMDataset, val_ds: LibSVMDataset, num_workers: int, batch_size: int
+):
     """
     Helper function creating train and validation data loaders with specified number of workers and batch sizes.
     :param train_ds: LibSVMDataset train dataset
@@ -245,6 +278,10 @@ def create_data_loaders(train_ds: LibSVMDataset, val_ds: LibSVMDataset, num_work
     logger.info("total batch size is {}".format(total_batch_size))
 
     # Please note that the batch size for validation dataloader is twice the total_batch_size
-    train_dl = DataLoader(train_ds, batch_size=total_batch_size, num_workers=num_workers, shuffle=True)
-    val_dl = DataLoader(val_ds, batch_size=total_batch_size, num_workers=num_workers, shuffle=False)
+    train_dl = DataLoader(
+        train_ds, batch_size=total_batch_size, num_workers=num_workers, shuffle=True
+    )
+    val_dl = DataLoader(
+        val_ds, batch_size=total_batch_size, num_workers=num_workers, shuffle=False
+    )
     return train_dl, val_dl

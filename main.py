@@ -5,7 +5,11 @@ import numpy as np
 import os
 import torch
 from allrank.config import Config
-from allrank.data.dataset_loading import load_libsvm_dataset, create_data_loaders
+from allrank.data.dataset_loading import (
+    load_libsvm_dataset,
+    create_data_loaders,
+    FixLength,
+)
 from allrank.models.model import make_model
 from allrank.models.model_utils import get_torch_device, CustomDataParallel
 from allrank.training.train_utils import fit
@@ -25,7 +29,6 @@ from pprint import pformat
 from torch import optim
 import datetime
 
-
 # python main.py --job_dir haolun_pointwise --config_file_name scripts/config_haolun_pointwise.json
 # python main.py --job_dir haolun_pairwise --config_file_name scripts/config_haolun_pairwise.json
 
@@ -39,7 +42,7 @@ def parse_args() -> Namespace:
         "--run_id",
         help="Name of this run to be recorded (must be unique within output dir)",
         # required=True,
-        default = 'play'
+        default="play",
     )
     parser.add_argument(
         "--config_file_name",
@@ -80,6 +83,9 @@ def run():
     execute_command("cp {} {}".format(paths.config_path, output_config_path))
 
     # train_ds, val_ds
+    # train_ds: [n_train_query, max_train_query_doc_length, n_feature]
+    # later will be padded to: [batch_size, slate_length, n_feature]
+    # val_ds: [n_val_query, max_val_query_doc_length, n_feature]
     train_ds, val_ds = load_libsvm_dataset(
         input_path=config.data.path,
         slate_length=config.data.slate_length,
