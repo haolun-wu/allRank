@@ -84,7 +84,7 @@ def run():
 
     # train_ds, val_ds
     # train_ds: [n_train_query, max_train_query_doc_length, n_feature]
-    # later will be padded to: [batch_size, slate_length, n_feature]
+    ## later will be padded to: [batch_size, slate_length, n_feature]
     # val_ds: [n_val_query, max_val_query_doc_length, n_feature]
 
     train_ds, val_ds = load_libsvm_dataset(
